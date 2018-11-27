@@ -26,10 +26,13 @@ ApplicationWindow {
 
     ImageClicker {
         id: clicker
+
         anchors.left: parent.left
         anchors.top: menu.bottom
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+
+        pixelGridSize: menu.selectedPixelGridSize
 
         Connections {
             target: menu

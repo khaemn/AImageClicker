@@ -15,12 +15,14 @@ Rectangle {
     property string infoText: "information text"
 
     readonly property var pixelGridSizes: [100, 50, 20, 10]
+    readonly property int selectedPixelGridSize: _pixelGridSize
+
+    property int _pixelGridSize: 100
 
     signal forwardClicked
     signal backwardClicked
     signal folderSelected(string path)
     signal fileSelected(string path)
-    signal gridSelected(int size)
 
     height: 50
 
@@ -72,7 +74,7 @@ Rectangle {
             Layout.maximumWidth: 80
             height: root.height
             onCurrentIndexChanged: {
-                root.gridSelected(pixelGridSizes[currentIndex]);
+                root._pixelGridSize = pixelGridSizes[currentIndex];
             }
         }
 

@@ -6,9 +6,12 @@ Rectangle {
     property bool selected: false
 
     readonly property color _selectedColor: "#4000FF00"
-    readonly property color _color: "#400000FF"
+    readonly property color _color: "#400000CC"
     readonly property color _hoveredBorderColor: "yellow"
     readonly property color _borderColor: "grey"
+
+    readonly property int _selectionButton: Qt.LeftButton
+    readonly property int _unselectionButton: Qt.RightButton
 
     border.color: _borderColor
     border.width: 1
@@ -22,14 +25,16 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
 
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+
         onEntered: {
             root.border.color = _hoveredBorderColor;
         }
         onExited: {
             root.border.color = _borderColor
         }
-        onClicked: {
-            root.selected = !root.selected;
+        onPressed: {
+            root.selected = pressedButtons & _selectionButton;
             // TODO: emit signal.
         }
     }

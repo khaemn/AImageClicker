@@ -28,8 +28,11 @@ Item {
     Image {
         id: viewer
 
-        readonly property real dpX: sourceSize.width / paintedWidth
-        readonly property real dpY: sourceSize.height / paintedHeight
+        readonly property real dpX: paintedWidth / sourceSize.width
+        readonly property real dpY: paintedHeight / sourceSize.height
+
+        readonly property int horizontalChunks: Math.round(sourceSize.width / root.pixelGridSize)
+        readonly property int verticalChunks: Math.round(sourceSize.height / root.pixelGridSize)
 
         anchors.fill: parent
         source: root.currentImageSource
@@ -53,24 +56,35 @@ Item {
     Item {
         id: selectionGrid
 
-        readonly property int totalColumns: 5
-        readonly property int totalRows: 4
+        readonly property int totalRows: viewer.verticalChunks
+        readonly property int chunksInRow: viewer.horizontalChunks
 
-        Row {
-            id: seleection
+        anchors.fill: imageArea
+
+        visible: viewer.status === Image.Ready
+
+        Column {
+            id: selectionRows
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+
             Repeater {
+                model: selectionGrid.totalRows
 
+                Row {
+                    id: selectionRow
+                    objectName: "SelectionRow" + index
+
+                    Repeater {
+                        model: selectionGrid.chunksInRow
+                        SelectionChunk {
+                            width: pixelGridSize * viewer.dpX
+                            height: pixelGridSize * viewer.dpY
+                        }
+                    }
+                }
             }
         }
-    }
-
-    SelectionChunk {
-        id: selectionChunkDummy
-
-        anchors.left: imageArea.left
-        anchors.top: imageArea.top
-
-        width: root.pixelGridSize * viewer.dpX
-        height: root.pixelGridSize * viewer.dpY
     }
 }
