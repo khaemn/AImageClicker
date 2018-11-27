@@ -15,33 +15,43 @@ Rectangle {
     property string infoText: "information text"
 
     readonly property var pixelGridSizes: [100, 50, 20, 10]
-//    {
-//        0 : 100,
-//        1 : 50,
-//        2 : 20,
-//        3 : 10
-//    }
 
     signal forwardClicked
-    signal backwardClicker
-    signal folderSelected
-    signal gridSelected
+    signal backwardClicked
+    signal folderSelected(string path)
+    signal fileSelected(string path)
+    signal gridSelected(int size)
 
     height: 50
 
-    Row {
+    RowLayout {
         id: layout
         anchors.fill: parent
         spacing: 10
 
         Button {
-            id: openBtn
-            text: "Open dir ..."
-            width: 100
+            id: openFileBtn
+            text: "Open file"
+            Layout.maximumWidth: 100
             height: root.height
             font.pixelSize: 12
 
             onClicked: {
+                fileDialog.nameFilters = [ "Image files (*.jpg *.png)", "All files (*)" ];
+                fileDialog.selectFolder = false;
+                fileDialog.open()
+            }
+        }
+
+        Button {
+            id: openDirBtn
+            text: "Open dir"
+            Layout.maximumWidth: 100
+            height: root.height
+            font.pixelSize: 12
+
+            onClicked: {
+                fileDialog.selectFolder = true;
                 fileDialog.open()
             }
         }
@@ -59,10 +69,10 @@ Rectangle {
         ComboBox {
             id: gridSelector
             model: root.pixelGridSizes
-            width: 100
+            Layout.maximumWidth: 80
             height: root.height
             onCurrentIndexChanged: {
-                root.gridSelected(pixelGridSizes[currentIndex])
+                root.gridSelected(pixelGridSizes[currentIndex]);
             }
         }
 
@@ -71,7 +81,10 @@ Rectangle {
         Text {
             id: infoText
             text: root.infoText
-            width: 370
+
+            Layout.fillWidth: true
+            Layout.minimumWidth: 300
+
             height: root.height
             horizontalAlignment: Qt.AlignHCenter
             verticalAlignment: Qt.AlignVCenter
@@ -84,6 +97,8 @@ Rectangle {
             width: 50
             height: root.height
             font.pixelSize: 12
+
+            onClicked: root.backwardClicked()
         }
 
         Button {
@@ -92,6 +107,8 @@ Rectangle {
             width: 50
             height: root.height
             font.pixelSize: 12
+
+            onClicked: root.forwardClicked()
         }
     }
 
@@ -100,15 +117,16 @@ Rectangle {
         title: "Please choose a folder with images or a single image"
         folder: shortcuts.home
 
-        selectFolder: true
-        selectMultiple: true
-
         onAccepted: {
-            console.log("User selected folder: " + fileDialog.fileUrls)
-            root.folderSelected(fileDialog.fileUrls)
+            console.log("User selected path: " + fileDialog.fileUrls);
+            if (selectFolder) {
+                root.folderSelected(fileDialog.fileUrls);
+            } else {
+                root.fileSelected(fileDialog.fileUrls);
+            }
         }
         onRejected: {
-            console.log("Folder selection anceled")
+            console.log("Folder selection anceled");
         }
     }
 }

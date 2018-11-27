@@ -6,8 +6,8 @@ ApplicationWindow {
 
     visible: true
 
-    width: 800
-    height: 600
+    width: 1024
+    height: 768
     maximumHeight: height
     maximumWidth: width
     minimumHeight: height
@@ -18,8 +18,33 @@ ApplicationWindow {
     color: "darkgrey"
 
     MainBar {
+        id: menu
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.right: parent.right
+    }
+
+    ImageClicker {
+        id: clicker
+        anchors.left: parent.left
+        anchors.top: menu.bottom
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        Connections {
+            target: menu
+            onFileSelected: {
+                clicker.openFile(path);
+            }
+            onFolderSelected: {
+                clicker.openFolder(path);
+            }
+            onForwardClicked: {
+                clicker.forward();
+            }
+            onBackwardClicked: {
+                clicker.back();
+            }
+        }
     }
 }

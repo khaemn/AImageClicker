@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>MainBar.qml</file>
+        <file>ImageClicker.qml</file>
+        <file>SelectionChunk.qml</file>
     </qresource>
 </RCC>
