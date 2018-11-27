@@ -7,6 +7,9 @@ Item {
     // TODO: bind to corresp. control
     property int pixelGridSize: 100
 
+    readonly property string statusText: _statusText
+    property string _statusText: "Click 'Open ..' to load file or folder."
+
     function openFile(path) {
         currentImageSource = path;
     }
@@ -40,6 +43,13 @@ Item {
         // TODO: correct size handling
         fillMode: Image.PreserveAspectFit
 
+        onStatusChanged: {
+            if (status === Image.Ready) {
+                root._statusText = "Loaded\n"
+                                  + source
+                                  + "\n" + sourceSize.width + "x" + sourceSize.height
+            }
+        }
     }
 
     Rectangle {

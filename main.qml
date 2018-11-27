@@ -19,9 +19,12 @@ ApplicationWindow {
 
     MainBar {
         id: menu
+
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.right: parent.right
+
+        infoText: clicker.statusText
     }
 
     ImageClicker {
