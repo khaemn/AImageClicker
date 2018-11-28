@@ -45,6 +45,7 @@ public slots:
 
 private:
     bool writeModelToFile(const QString& filename);
+    bool loadFileToModel(const QString& filename);
 
     std::shared_ptr<SelectionModel> _model;
     QString m_imagePath;

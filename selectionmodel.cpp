@@ -38,8 +38,8 @@ QVariant SelectionModel::data(const QModelIndex &index, int role) const
     Q_UNUSED(role);
 
     if (!index.isValid()
-            || index.row() > rowCount()
-            || index.column() > columnCount())
+            || index.row() >= rowCount()
+            || index.column() >= columnCount())
     {
         return QVariant();
     }

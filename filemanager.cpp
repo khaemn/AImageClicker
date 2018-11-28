@@ -5,7 +5,7 @@
 #include <QUrl>
 #include <QDir>
 
-static const QString DEFAULT_EXTENSION = ".txt";
+static const QString MODEL_EXTENSION = ".txt";
 static const QStringList EXTENSION_FILTERS = { "*.png", "*.jpg", "*.jpeg" };
 
 FileManager::FileManager(QObject *parent) : QObject(parent)
@@ -26,25 +26,22 @@ void FileManager::openFile(const QString &file)
         return;
     }
 
-    const QUrl url(file);
+    auto path = QUrl(file).toLocalFile();
 
-    auto path = url.path();
-    while (!path.isEmpty() && path.at(0) == '/') {
-        // Erasing extra "/" character.
-        // TODO: check on linux!
-        path.remove(0,1);
-    }
     QImageReader reader(path);
     const QSize sizeOfImage = reader.size();
     const int height = sizeOfImage.height();
     const int width = sizeOfImage.width();
 
+
     qDebug() << "Loaded an image " << path << " with size " << width << "x" << height;
 
-    const auto gridWidth = roundf(static_cast<float>(width) / m_pixelGridSize);
-    const auto gridHeight = roundf(static_cast<float>(height) / m_pixelGridSize);
-    qDebug() << "Initing model grid with size " << m_pixelGridSize << ":" << gridWidth << "x" << gridHeight;
-    _model->init(gridWidth, gridHeight);
+    if (!loadFileToModel(path)) {
+        const auto gridWidth = roundf(static_cast<float>(width) / m_pixelGridSize);
+        const auto gridHeight = roundf(static_cast<float>(height) / m_pixelGridSize);
+        qDebug() << "Initing model grid with size " << m_pixelGridSize << ":" << gridWidth << "x" << gridHeight;
+        _model->init(gridWidth, gridHeight);
+    }
 
     setImagePath(file);
 }
@@ -110,7 +107,7 @@ void FileManager::saveSelectionFile()
     // Extracting the file name only
     const auto imageFilename = pathToImage.fileName();
     auto withoutExtension = imageFilename.mid(0, imageFilename.indexOf('.'));
-    const auto selectionFilename = withoutExtension.append(DEFAULT_EXTENSION);
+    const auto selectionFilename = withoutExtension.append(MODEL_EXTENSION);
     auto fullpath = pathToImage.absoluteDir().path().append("/" + selectionFilename);
 
     writeModelToFile(fullpath);
@@ -142,6 +139,9 @@ void FileManager::setPixelGridSize(int pixelGridSize)
 
     m_pixelGridSize = pixelGridSize;
     emit pixelGridSizeChanged(m_pixelGridSize);
+
+    // Reopen the file after changing the grid size (!)
+    openFile(m_imagePath);
 }
 
 bool FileManager::writeModelToFile(const QString& filename)
@@ -153,24 +153,102 @@ bool FileManager::writeModelToFile(const QString& filename)
     }
     file.flush();
 
-    static const QString HEADER_FORMAT("%1\n");
-    static const QString LINE_FORMAT("%1,%2,%3\n");
+    static const QString HEADER_FORMAT("%1,%2,%3\n"); // Pixel grid size, width, height
+    static const QString LINE_FORMAT("%1,%2,%3\n"); // x, y, isSelected
     file.seek(0);
 
     const auto height = _model->rowCount();
     const auto width = _model->columnCount();
 
     int gridSize = m_pixelGridSize;
-    file.write(HEADER_FORMAT.arg(gridSize).toLatin1());
+    file.write(HEADER_FORMAT
+               .arg(gridSize)
+               .arg(_model->columnCount())
+               .arg(_model->rowCount())
+                    .toLatin1());
 
     for (auto y(0); y < height; ++y) {
         for (auto x(0); x < width; ++x) {
             int value = _model->data(_model->index(y, x)).toInt();
-            QString line = LINE_FORMAT.arg(x).arg(y).arg(value);
+            QString line = LINE_FORMAT
+                            .arg(x)
+                            .arg(y)
+                            .arg(value);
             file.write(line.toLatin1());
         }
     }
 
     file.close();
+    return true;
+}
+
+bool FileManager::loadFileToModel(const QString &filename)
+{
+    // TODO: impl. safe and effective way to replace extension
+    QString modelFile = filename;
+    while(modelFile.rbegin() != modelFile.rend()
+          && (*modelFile.rbegin() != '.'))
+    {
+        modelFile.chop(1);
+    }
+    modelFile.chop(1); // removing the '.' itself
+    modelFile.append(MODEL_EXTENSION);
+
+
+    QFile file(modelFile);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return false;
+    }
+
+    file.seek(0);
+
+    QString content = QString::fromLatin1(file.readAll());
+    QStringList records = content.split("\n");
+
+    bool ok = false;
+    QStringList header = records.at(0).split(',');
+    records.removeAt(0);
+
+    if (header.size() != 3)
+    {
+        qDebug() << "Failed to read model file header.";
+        return false;
+    }
+
+    auto pixelSize = header.at(0).toUInt(&ok);
+    auto width = header.at(1).toUInt(&ok);
+    auto height = header.at(2).toUInt(&ok);
+
+    if (!ok)
+    {
+        qDebug() << "Failed to read model file header.";
+        return false;
+    }
+
+    m_pixelGridSize = pixelSize;
+
+    // After removing the header record, all the rest is data.
+    PointMatrix matrix(height);
+    for (auto& row : matrix)
+    {
+        row = std::vector<int>(width);
+    }
+
+    for (const QString& record : records)
+    {
+        std::vector<int> values;
+        for(QString token : record.split(','))
+        {
+            values.push_back(token.toUInt());
+        }
+        auto x = values[0];
+        auto y = values[1];
+        auto selected = values[2];
+        matrix[y][x] = selected;
+    }
+
+    _model->init(std::move(matrix));
+
     return true;
 }
