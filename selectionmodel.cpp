@@ -36,15 +36,26 @@ int SelectionModel::columnCount(const QModelIndex &) const
 QVariant SelectionModel::data(const QModelIndex &index, int role) const
 {
     Q_UNUSED(role);
-
+    const auto row = index.row();
+    const auto col = index.column();
     if (!index.isValid()
-            || index.row() >= rowCount()
-            || index.column() >= columnCount())
+            || row >= rowCount()
+            || col >= _data.at(row).size())
     {
+        qDebug() << "Invalid model index requested:" << col << row;
         return QVariant();
     }
-
-    return QVariant::fromValue(_data.at(index.row()).at(index.column()));
+    int value = _data.at(row).at(col);
+    if (value < 0 || value > 1)
+    {
+        qDebug() << "Wrong value retrieved:" << value
+                 << "row" << row
+                 << "col" << col
+                 << "total rows" << _data.size()
+                 << "total cols in row" << _data[row].size()
+                 << "value" << _data[row][col];
+    }
+    return QVariant::fromValue<int>(value);
 }
 
 void SelectionModel::init(int width, int height) // READ FILE HERE

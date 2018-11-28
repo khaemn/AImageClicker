@@ -10,8 +10,6 @@ static const QStringList EXTENSION_FILTERS = { "*.png", "*.jpg", "*.jpeg" };
 
 FileManager::FileManager(QObject *parent) : QObject(parent)
 {
-    // file:///C:/Users/Vladimir/Pictures/screen1.png
-    // openDir("file:///C:/Users/Vladimir/Pictures");
 }
 
 void FileManager::setModel(std::shared_ptr<SelectionModel> model)
@@ -58,7 +56,7 @@ void FileManager::openDir(const QString &dir)
 
     if (availableFiles.empty())
     {
-        // TODO: log warning?
+        qDebug() << "No" << EXTENSION_FILTERS << "found in given folder.";
         return;
     }
 
@@ -169,7 +167,17 @@ bool FileManager::writeModelToFile(const QString& filename)
 
     for (auto y(0); y < height; ++y) {
         for (auto x(0); x < width; ++x) {
-            int value = _model->data(_model->index(y, x)).toInt();
+            bool ok=false;
+            const auto index = _model->index(y, x);
+            auto data = _model->data(index);
+            int value = data.toInt(&ok);
+            if (!ok || value < 0 || value > 1)
+            {
+                qDebug() << "Warning! something bad happened when retrieving selection value in model at row"
+                         << y
+                         << "column" << x
+                         << data;
+            }
             QString line = LINE_FORMAT
                             .arg(x)
                             .arg(y)
@@ -237,6 +245,10 @@ bool FileManager::loadFileToModel(const QString &filename)
 
     for (const QString& record : records)
     {
+        if(record.isEmpty())
+        {
+            continue;
+        }
         std::vector<int> values;
         for(QString token : record.split(','))
         {
