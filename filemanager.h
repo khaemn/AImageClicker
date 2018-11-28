@@ -44,6 +44,8 @@ public slots:
     void setPixelGridSize(int pixelGridSize);
 
 private:
+    bool writeModelToFile(const QString& filename);
+
     std::shared_ptr<SelectionModel> _model;
     QString m_imagePath;
     int m_pixelGridSize = 100;

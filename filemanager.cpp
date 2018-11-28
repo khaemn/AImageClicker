@@ -74,15 +74,7 @@ void FileManager::saveSelectionFile()
     const auto selectionFilename = withoutExtension.append(DEFAULT_EXTENSION);
     auto fullpath = pathToImage.absoluteDir().path().append("/" + selectionFilename);
 
-    QFile txtFile(fullpath);
-    if (!txtFile.open(QIODevice::WriteOnly))
-    {
-        return;
-    }
-
-    // TODO: impl filewriting
-
-    txtFile.close();
+    writeModelToFile(fullpath);
 }
 
 QString FileManager::imagePath() const
@@ -111,4 +103,31 @@ void FileManager::setPixelGridSize(int pixelGridSize)
 
     m_pixelGridSize = pixelGridSize;
     emit pixelGridSizeChanged(m_pixelGridSize);
+}
+
+bool FileManager::writeModelToFile(const QString& filename)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        return false;
+    }
+    file.flush();
+
+    static const QString LINE_FORMAT("%1,%2,%3\n");
+    file.seek(0);
+
+    const auto height = _model->rowCount();
+    const auto width = _model->columnCount();
+
+    for (auto y(0); y < height; ++y) {
+        for (auto x(0); x < width; ++x) {
+            int value = _model->data(_model->index(y, x)).toInt();
+            QString line = LINE_FORMAT.arg(x).arg(y).arg(value);
+            file.write(line.toLatin1());
+        }
+    }
+
+
+    file.close();
 }
