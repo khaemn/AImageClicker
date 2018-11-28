@@ -4,13 +4,15 @@
 #include <QAbstractItemModel>
 
 #include <vector>
-#include <map>
 
-using Point = std::pair<int, int>; // x, y
+using PointMatrix = std::vector<std::vector<int>>;
 
 class SelectionModel : public QAbstractItemModel
 {
     Q_OBJECT
+
+    Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
+    Q_PROPERTY(int height READ height WRITE setHeight NOTIFY heightChanged)
 
 public:
     explicit SelectionModel(QObject *parent = nullptr);
@@ -29,12 +31,26 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     /// Inits the model with proper size.
-    Q_INVOKABLE void init(int width, int height);
+    void init(int width, int height);
+    void init(PointMatrix&& data);
+
     Q_INVOKABLE void setChunk(int x, int y, bool selected);
 
+    int width() const;
+    int height() const;
+
+public slots:
+    void setWidth(int width);
+    void setHeight(int height);
+
+signals:
+    void widthChanged(int width);
+    void heightChanged(int height);
 
 private:
-    std::vector<std::vector<int>> _data;
+    PointMatrix _data;
+    int m_width = 0;
+    int m_height = 0;
 };
 
 #endif // SELECTIONMODEL_H

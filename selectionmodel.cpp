@@ -6,9 +6,9 @@ SelectionModel::SelectionModel(QObject *parent)
 {
 }
 
-QVariant SelectionModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant SelectionModel::headerData(int, Qt::Orientation, int) const
 {
-    // FIXME: Implement me!
+    return QVariant();
 }
 
 QModelIndex SelectionModel::index(int row, int column, const QModelIndex &parent) const
@@ -18,18 +18,17 @@ QModelIndex SelectionModel::index(int row, int column, const QModelIndex &parent
     return createIndex(row, column);;
 }
 
-QModelIndex SelectionModel::parent(const QModelIndex &index) const
+QModelIndex SelectionModel::parent(const QModelIndex &) const
 {
-    // FIXME: Implement me!
     return createIndex(0,0);
 }
 
-int SelectionModel::rowCount(const QModelIndex &parent) const
+int SelectionModel::rowCount(const QModelIndex &) const
 {
     return _data.size();
 }
 
-int SelectionModel::columnCount(const QModelIndex &parent) const
+int SelectionModel::columnCount(const QModelIndex &) const
 {
     return _data.at(0).size();
 }
@@ -55,9 +54,19 @@ void SelectionModel::init(int width, int height) // READ FILE HERE
     for (auto y(0); y < height; ++y) {
         _data.push_back(std::vector<int>(width));
     }
-    _data[0][1] = 1;
-    _data[height-1][width-1] = 1;
     emit dataChanged(createIndex(0,0), createIndex(columnCount(), rowCount()));
+    setWidth(columnCount());
+    setHeight(rowCount());
+    endResetModel();
+}
+
+void SelectionModel::init(PointMatrix &&data)
+{
+    beginResetModel();
+    _data = data;
+    emit dataChanged(createIndex(0,0), createIndex(columnCount(), rowCount()));
+    setWidth(columnCount());
+    setHeight(rowCount());
     endResetModel();
 }
 
@@ -68,4 +77,26 @@ void SelectionModel::setChunk(int x, int y, bool selected)
         _data[y][x] = selected ? 1 : 0;
         emit dataChanged(this->index(x,y), this->index(x,y));
     }
+}
+
+int SelectionModel::width() const
+{
+    return m_width;
+}
+
+int SelectionModel::height() const
+{
+    return m_height;
+}
+
+void SelectionModel::setWidth(int width)
+{
+    m_width = width;
+    emit widthChanged(m_width);
+}
+
+void SelectionModel::setHeight(int height)
+{
+    m_height = height;
+    emit heightChanged(m_height);
 }

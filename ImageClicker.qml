@@ -74,7 +74,7 @@ Item {
             }
 
             Repeater {
-                model: selectionGrid.totalRows
+                model: root.model.height
 
                 Row {
                     id: selectionRow
@@ -87,11 +87,14 @@ Item {
                     }
 
                     Repeater {
-                        model: selectionGrid.chunksInRow
+                        model: root.model.width
+
                         SelectionChunk {
                             width: pixelGridSize * viewer.dpX
                             height: pixelGridSize * viewer.dpY
-                            selected: root.model.data(root.model.index(selectionRow._index, index)) === 1
+                            selected: root.model
+                                      ? root.model.data(root.model.index(selectionRow._index, index)) === 1
+                                      : false
                             onTriggered: {
                                 selectionRow.chunkTriggered(index, wasSelected);
                                 console.log("Data at: ", root.model.data(root.model.index(selectionRow._index, index))

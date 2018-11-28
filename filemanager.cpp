@@ -76,6 +76,10 @@ void FileManager::openDir(const QString &dir)
 
 void FileManager::loadNextImage()
 {
+    if (m_availableImages.isEmpty())
+    {
+        return;
+    }
     if (++m_currentImageFileIndex >= m_availableImages.size())
     {
         m_currentImageFileIndex = m_availableImages.size() - 1;
@@ -86,6 +90,10 @@ void FileManager::loadNextImage()
 
 void FileManager::loadPrevImage()
 {
+    if (m_availableImages.isEmpty())
+    {
+        return;
+    }
     if (--m_currentImageFileIndex < 0)
     {
         m_currentImageFileIndex = 0;
@@ -145,11 +153,15 @@ bool FileManager::writeModelToFile(const QString& filename)
     }
     file.flush();
 
+    static const QString HEADER_FORMAT("%1\n");
     static const QString LINE_FORMAT("%1,%2,%3\n");
     file.seek(0);
 
     const auto height = _model->rowCount();
     const auto width = _model->columnCount();
+
+    int gridSize = m_pixelGridSize;
+    file.write(HEADER_FORMAT.arg(gridSize).toLatin1());
 
     for (auto y(0); y < height; ++y) {
         for (auto x(0); x < width; ++x) {
@@ -160,4 +172,5 @@ bool FileManager::writeModelToFile(const QString& filename)
     }
 
     file.close();
+    return true;
 }
