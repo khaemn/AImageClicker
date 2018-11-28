@@ -71,6 +71,7 @@ void FileManager::openDir(const QString &dir)
 
 void FileManager::loadNextImage()
 {
+    saveSelectionFile();
     if (m_availableImages.isEmpty())
     {
         return;
@@ -79,12 +80,12 @@ void FileManager::loadNextImage()
     {
         m_currentImageFileIndex = m_availableImages.size() - 1;
     }
-    saveSelectionFile();
     openFile(m_availableImages.at(m_currentImageFileIndex));
 }
 
 void FileManager::loadPrevImage()
 {
+    saveSelectionFile();
     if (m_availableImages.isEmpty())
     {
         return;
@@ -93,7 +94,6 @@ void FileManager::loadPrevImage()
     {
         m_currentImageFileIndex = 0;
     }
-    saveSelectionFile();
     openFile(m_availableImages.at(m_currentImageFileIndex));
 }
 

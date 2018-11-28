@@ -14,7 +14,7 @@ Rectangle {
 
     property string infoText: "information text"
 
-    readonly property var pixelGridSizes: [100, 50, 20, 10]
+    readonly property var pixelGridSizes: [500, 200, 100, 50, 20, 10]
     readonly property int selectedPixelGridSize: _pixelGridSize
 
     property int _pixelGridSize: 100
@@ -73,6 +73,7 @@ Rectangle {
             model: root.pixelGridSizes
             Layout.maximumWidth: 80
             height: root.height
+            currentIndex: 2 // 100 px
             onCurrentIndexChanged: {
                 root._pixelGridSize = pixelGridSizes[currentIndex];
             }
