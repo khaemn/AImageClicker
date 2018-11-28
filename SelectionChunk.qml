@@ -13,6 +13,8 @@ Rectangle {
     readonly property int _selectionButton: Qt.LeftButton
     readonly property int _unselectionButton: Qt.RightButton
 
+    signal triggered(bool wasSelected)
+
     border.color: _borderColor
     border.width: 1
 
@@ -34,7 +36,8 @@ Rectangle {
             root.border.color = _borderColor
         }
         onPressed: {
-            root.selected = pressedButtons & _selectionButton;
+            root.triggered(pressedButtons & _selectionButton);
+            // root.selected = pressedButtons & _selectionButton;
             // TODO: emit signal.
         }
     }

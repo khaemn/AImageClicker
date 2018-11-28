@@ -1,8 +1,12 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.0
 
+import SelectionModel 1.0
+
 ApplicationWindow {
     id: root
+
+    property SelectionModel backend: backendModel
 
     visible: true
 
@@ -36,6 +40,8 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
 
         pixelGridSize: menu.selectedPixelGridSize
+
+        model: root.backend
 
         Connections {
             target: menu

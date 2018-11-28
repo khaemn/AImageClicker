@@ -1,11 +1,15 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.0
+import QtQuick.Controls 1.4 as C
+import SelectionModel 1.0
 
 Item {
     id: root
 
     // TODO: bind to corresp. control
     property int pixelGridSize: 100
+
+    property SelectionModel model
 
     readonly property string statusText: _statusText
     property string _statusText: "Click 'Open ..' to load file or folder."
@@ -48,6 +52,8 @@ Item {
                 root._statusText = "Loaded\n"
                                   + source
                                   + "\n" + sourceSize.width + "x" + sourceSize.height
+                root.model.init(Math.round(sourceSize.width / root.pixelGridSize),
+                                Math.round(sourceSize.height / root.pixelGridSize));
             }
         }
     }
@@ -63,6 +69,15 @@ Item {
         opacity: 0.1
     }
 
+//    C.TableView {
+//        anchors.fill: imageArea
+//        model: root.model
+//        opacity: 0.5
+//        onModelChanged: {
+//            console.log(model)
+//        }
+//    }
+
     Item {
         id: selectionGrid
 
@@ -74,10 +89,16 @@ Item {
         visible: viewer.status === Image.Ready
 
         Column {
-            id: selectionRows
+            id: selectionRowsColumn
 
             anchors.top: parent.top
             anchors.left: parent.left
+
+            function chunkTriggered(chunkX, chunkY, selected) {
+                // TODO: impl me
+                console.log("Chunk triggered: ", chunkX, chunkY);
+                model.setChunk(chunkX, chunkY, selected)
+            }
 
             Repeater {
                 model: selectionGrid.totalRows
@@ -86,11 +107,24 @@ Item {
                     id: selectionRow
                     objectName: "SelectionRow" + index
 
+                    readonly property int _index: index
+
+                    function chunkTriggered(chunkX, selected) {
+                        selectionRowsColumn.chunkTriggered(chunkX, index, selected);
+                    }
+
                     Repeater {
                         model: selectionGrid.chunksInRow
                         SelectionChunk {
                             width: pixelGridSize * viewer.dpX
                             height: pixelGridSize * viewer.dpY
+                            selected: root.model.data(root.model.index(selectionRow._index, index)) === 1
+                            onTriggered: {
+                                selectionRow.chunkTriggered(index, wasSelected);
+                                console.log("Data at: ", root.model.data(root.model.index(selectionRow._index, index))
+                                            , "Selected:", wasSelected, selected)
+                                selected = root.model.data(root.model.index(selectionRow._index, index)) === 1
+                            }
                         }
                     }
                 }
