@@ -49,6 +49,9 @@ private:
     std::shared_ptr<SelectionModel> _model;
     QString m_imagePath;
     int m_pixelGridSize = 100;
+
+    QStringList m_availableImages;
+    int m_currentImageFileIndex = -1;
 };
 
 #endif // FILEMANAGER_H

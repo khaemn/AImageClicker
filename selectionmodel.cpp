@@ -50,6 +50,7 @@ QVariant SelectionModel::data(const QModelIndex &index, int role) const
 
 void SelectionModel::init(int width, int height) // READ FILE HERE
 {
+    beginResetModel();
     _data.clear();
     for (auto y(0); y < height; ++y) {
         _data.push_back(std::vector<int>(width));
@@ -57,6 +58,7 @@ void SelectionModel::init(int width, int height) // READ FILE HERE
     _data[0][1] = 1;
     _data[height-1][width-1] = 1;
     emit dataChanged(createIndex(0,0), createIndex(columnCount(), rowCount()));
+    endResetModel();
 }
 
 void SelectionModel::setChunk(int x, int y, bool selected)
@@ -65,8 +67,5 @@ void SelectionModel::setChunk(int x, int y, bool selected)
         && (y >= 0 && y < rowCount())) {
         _data[y][x] = selected ? 1 : 0;
         emit dataChanged(this->index(x,y), this->index(x,y));
-        //emit dataChanged(createIndex(0,0), createIndex(columnCount(), rowCount()));
     }
-
-    qDebug() << "Chunk changed " << x << y << selected;
 }

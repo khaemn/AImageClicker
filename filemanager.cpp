@@ -6,9 +6,12 @@
 #include <QDir>
 
 static const QString DEFAULT_EXTENSION = ".txt";
+static const QStringList EXTENSION_FILTERS = { "*.png", "*.jpg", "*.jpeg" };
 
 FileManager::FileManager(QObject *parent) : QObject(parent)
 {
+    // file:///C:/Users/Vladimir/Pictures/screen1.png
+    // openDir("file:///C:/Users/Vladimir/Pictures");
 }
 
 void FileManager::setModel(std::shared_ptr<SelectionModel> model)
@@ -48,25 +51,53 @@ void FileManager::openFile(const QString &file)
 
 void FileManager::openDir(const QString &dir)
 {
+    const QUrl url(dir);
+    QString dirPath = url.toLocalFile();
+    QDir imageFolder(dirPath);
 
+    m_availableImages.clear();
+    m_currentImageFileIndex = -1;
+    auto availableFiles = imageFolder.entryList(EXTENSION_FILTERS);
+
+    if (availableFiles.empty())
+    {
+        // TODO: log warning?
+        return;
+    }
+
+    for (const auto file : availableFiles)
+    {
+        m_availableImages.append(QUrl::fromLocalFile(imageFolder.path() + "/" + file).toString());
+    }
+
+    m_currentImageFileIndex = 0;
+    openFile(m_availableImages.at(m_currentImageFileIndex));
 }
 
 void FileManager::loadNextImage()
 {
+    if (++m_currentImageFileIndex >= m_availableImages.size())
+    {
+        m_currentImageFileIndex = m_availableImages.size() - 1;
+    }
     saveSelectionFile();
-    // TODO: impl. loading
+    openFile(m_availableImages.at(m_currentImageFileIndex));
 }
 
 void FileManager::loadPrevImage()
 {
+    if (--m_currentImageFileIndex < 0)
+    {
+        m_currentImageFileIndex = 0;
+    }
     saveSelectionFile();
-    // TODO: impl. loading
+    openFile(m_availableImages.at(m_currentImageFileIndex));
 }
 
 void FileManager::saveSelectionFile()
 {
-    QUrl path(m_imagePath);
-    QFileInfo pathToImage(path.toLocalFile());
+    QUrl url(m_imagePath);
+    QFileInfo pathToImage(url.toLocalFile());
 
     // Extracting the file name only
     const auto imageFilename = pathToImage.fileName();
@@ -127,7 +158,6 @@ bool FileManager::writeModelToFile(const QString& filename)
             file.write(line.toLatin1());
         }
     }
-
 
     file.close();
 }
