@@ -27,9 +27,8 @@ Item {
         readonly property int verticalChunks: Math.round(sourceSize.height / root.pixelGridSize)
 
         anchors.fill: parent
-        source: root.currentImageSource
+        source: root.manager.imagePath
 
-        // TODO: correct size handling
         fillMode: Image.PreserveAspectFit
 
         onStatusChanged: {
@@ -37,8 +36,6 @@ Item {
                 root._statusText = "Loaded\n"
                                   + source
                                   + "\n" + sourceSize.width + "x" + sourceSize.height
-                root.model.init(Math.round(sourceSize.width / root.pixelGridSize),
-                                Math.round(sourceSize.height / root.pixelGridSize));
             }
         }
     }

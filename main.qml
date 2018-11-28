@@ -45,6 +45,12 @@ ApplicationWindow {
         }
     }
 
+    Binding {
+        target: root.fileManager
+        property: "pixelGridSize"
+        value: menu.selectedPixelGridSize
+    }
+
     ImageClicker {
         id: clicker
 

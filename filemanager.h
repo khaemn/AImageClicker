@@ -14,6 +14,7 @@ class FileManager : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QString imagePath READ imagePath WRITE setImagePath NOTIFY imagePathChanged)
+    Q_PROPERTY(int pixelGridSize READ pixelGridSize WRITE setPixelGridSize NOTIFY pixelGridSizeChanged)
 
 public:
     explicit FileManager(QObject *parent = nullptr);
@@ -30,18 +31,22 @@ public:
 
 
     QString imagePath() const;
+    int pixelGridSize() const;
 
 signals:
 
     void imagePathChanged(QString imagePath);
+    void pixelGridSizeChanged(int pixelGridSize);
 
 public slots:
 
     void setImagePath(QString imagePath);
+    void setPixelGridSize(int pixelGridSize);
 
 private:
     std::shared_ptr<SelectionModel> _model;
     QString m_imagePath;
+    int m_pixelGridSize = 100;
 };
 
 #endif // FILEMANAGER_H
