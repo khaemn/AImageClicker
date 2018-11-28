@@ -1,7 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.0
-import QtQuick.Controls 1.4 as C
-import SelectionModel 1.0
+
+import CppBackend 1.0
 
 Item {
     id: root
@@ -10,27 +10,12 @@ Item {
     property int pixelGridSize: 100
 
     property SelectionModel model
+    property FileManager manager
 
     readonly property string statusText: _statusText
     property string _statusText: "Click 'Open ..' to load file or folder."
 
-    function openFile(path) {
-        currentImageSource = path;
-    }
-
-    function openFolder(path) {
-        console.log("ON OPEN FOLDER NOT IMPL");
-    }
-
-    function forward() {
-        console.log("ON FORW CLICKED NOT IMPL");
-    }
-
-    function back() {
-        console.log("ON BACK CLICKED NOT IMPL");
-    }
-
-    property string currentImageSource: ""
+    readonly property string currentImageSource: manager.imagePath
 
     Image {
         id: viewer
@@ -68,15 +53,6 @@ Item {
         color: "green"
         opacity: 0.1
     }
-
-//    C.TableView {
-//        anchors.fill: imageArea
-//        model: root.model
-//        opacity: 0.5
-//        onModelChanged: {
-//            console.log(model)
-//        }
-//    }
 
     Item {
         id: selectionGrid

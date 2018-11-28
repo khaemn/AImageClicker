@@ -1,12 +1,13 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.0
 
-import SelectionModel 1.0
+import CppBackend 1.0
 
 ApplicationWindow {
     id: root
 
-    property SelectionModel backend: backendModel
+    property SelectionModel selectionModel: backendModel
+    property FileManager fileManager: backendManager
 
     visible: true
 
@@ -29,6 +30,19 @@ ApplicationWindow {
         anchors.right: parent.right
 
         infoText: clicker.statusText
+
+        onFileSelected: {
+            fileManager.openFile(path);
+        }
+        onFolderSelected: {
+            fileManager.openDir(path);
+        }
+        onForwardClicked: {
+            fileManager.loadNextImage();
+        }
+        onBackwardClicked: {
+            fileManager.loadPrevImage();
+        }
     }
 
     ImageClicker {
@@ -41,22 +55,7 @@ ApplicationWindow {
 
         pixelGridSize: menu.selectedPixelGridSize
 
-        model: root.backend
-
-        Connections {
-            target: menu
-            onFileSelected: {
-                clicker.openFile(path);
-            }
-            onFolderSelected: {
-                clicker.openFolder(path);
-            }
-            onForwardClicked: {
-                clicker.forward();
-            }
-            onBackwardClicked: {
-                clicker.back();
-            }
-        }
+        model: root.selectionModel
+        manager: root.fileManager
     }
 }
