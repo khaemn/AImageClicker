@@ -68,12 +68,12 @@ Item {
             anchors.left: parent.left
 
             function chunkTriggered(chunkX, chunkY, selected) {
-                // TODO: impl me
                 console.log("Chunk triggered: ", chunkX, chunkY);
                 model.setChunk(chunkX, chunkY, selected)
             }
 
             Repeater {
+                id: selectionRowsRepeater
                 model: root.model.height
 
                 Row {
@@ -97,13 +97,22 @@ Item {
                                       : false
                             onTriggered: {
                                 selectionRow.chunkTriggered(index, wasSelected);
+                                selected = root.model.data(root.model.index(selectionRow._index, index)) === 1
                                 console.log("Data at: ", root.model.data(root.model.index(selectionRow._index, index))
                                             , "Selected:", wasSelected, selected)
-                                selected = root.model.data(root.model.index(selectionRow._index, index)) === 1
                             }
                         }
                     }
                 }
+            }
+        }
+
+        Connections {
+            target: root.model
+            onModelReset: {
+                // Refreshing all grid using bruteforce model resetting.
+                selectionRowsRepeater.model = 0;
+                selectionRowsRepeater.model = root.model.height;
             }
         }
     }

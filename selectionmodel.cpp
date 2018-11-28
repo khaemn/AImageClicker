@@ -54,20 +54,20 @@ void SelectionModel::init(int width, int height) // READ FILE HERE
     for (auto y(0); y < height; ++y) {
         _data.push_back(std::vector<int>(width));
     }
-    emit dataChanged(createIndex(0,0), createIndex(columnCount(), rowCount()));
     setWidth(columnCount());
     setHeight(rowCount());
     endResetModel();
+    emit dataChanged(index(0,0), index(rowCount(), columnCount()));
 }
 
 void SelectionModel::init(PointMatrix &&data)
 {
     beginResetModel();
     _data = data;
-    emit dataChanged(createIndex(0,0), createIndex(columnCount(), rowCount()));
     setWidth(columnCount());
     setHeight(rowCount());
     endResetModel();
+    emit dataChanged(index(0,0), index(rowCount(), columnCount()));
 }
 
 void SelectionModel::setChunk(int x, int y, bool selected)
