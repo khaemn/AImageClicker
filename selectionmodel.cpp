@@ -85,8 +85,18 @@ void SelectionModel::setChunk(int x, int y, bool selected)
 {
     if ((x >= 0 && x < columnCount())
         && (y >= 0 && y < rowCount())) {
-        _data[y][x] = selected ? 1 : 0;
+
+        auto newValue = selected ? 1 : 0;
+        if (_data.at(y).at(x) == newValue)
+        {
+            return;
+        }
+
+        _data[y][x] = newValue;
         emit dataChanged(this->index(x,y), this->index(x,y));
+        // Strange temporary solution.
+        beginResetModel();
+        endResetModel();
     }
 }
 

@@ -64,6 +64,8 @@ Item {
         Column {
             id: selectionRowsColumn
 
+            property SelectionModel _model: root.model
+
             anchors.top: parent.top
             anchors.left: parent.left
 
@@ -76,6 +78,8 @@ Item {
                 id: selectionRowsRepeater
                 model: root.model.height
 
+                property SelectionModel _model: selectionRowsColumn._model
+
                 Row {
                     id: selectionRow
                     objectName: "SelectionRow" + index
@@ -87,22 +91,50 @@ Item {
                     }
 
                     Repeater {
+                        id: chunkRepeater
                         model: root.model.width
+
+                        property SelectionModel _model: selectionRowsRepeater._model
 
                         SelectionChunk {
                             width: pixelGridSize * viewer.dpX
                             height: pixelGridSize * viewer.dpY
-                            selected: root.model
-                                      ? root.model.data(root.model.index(selectionRow._index, index)) === 1
+                            selected: chunkRepeater._model
+                                      ? chunkRepeater._model.data(chunkRepeater._model.index(selectionRow._index, index)) === 1
                                       : false
-                            onTriggered: {
-                                selectionRow.chunkTriggered(index, wasSelected);
-                                selected = root.model.data(root.model.index(selectionRow._index, index)) === 1
-                                console.log("Data at: ", root.model.data(root.model.index(selectionRow._index, index))
-                                            , "Selected:", wasSelected, selected)
-                            }
                         }
                     }
+                }
+            }
+        }
+
+        MouseArea {
+            id: editArea
+
+            readonly property int _selectionButton: Qt.LeftButton
+            readonly property int _unselectionButton: Qt.RightButton
+
+            function triggerChunk(_x, _y, selection) {
+                var chunkX = Math.floor(_x / (root.pixelGridSize * viewer.dpX))
+                var chunkY = Math.floor(_y / (root.pixelGridSize * viewer.dpY))
+                root.model.setChunk(chunkX, chunkY, selection)
+            }
+
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+            onPressed: {
+                triggerChunk(mouseX, mouseY, (pressedButtons & _selectionButton))
+            }
+
+            onMouseXChanged: {
+                if (pressed) {
+                    triggerChunk(mouseX, mouseY, (pressedButtons & _selectionButton))
+                }
+            }
+            onMouseYChanged: {
+                if (pressed) {
+                    triggerChunk(mouseX, mouseY, (pressedButtons & _selectionButton))
                 }
             }
         }

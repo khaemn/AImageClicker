@@ -35,10 +35,5 @@ Rectangle {
         onExited: {
             root.border.color = _borderColor
         }
-        onPressed: {
-            root.triggered(pressedButtons & _selectionButton);
-            // root.selected = pressedButtons & _selectionButton;
-            // TODO: emit signal.
-        }
     }
 }
