@@ -252,7 +252,7 @@ bool FileManager::loadFileToModel(const QString &filename)
         std::vector<int> values;
         for(QString token : record.split(','))
         {
-            values.push_back(token.toUInt());
+            values.push_back(token.toInt());
         }
         auto x = values[0];
         auto y = values[1];

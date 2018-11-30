@@ -4,9 +4,11 @@ Rectangle {
     id: root
     
     property bool selected: false
+    property bool unused: false
 
     readonly property color _selectedColor: "#4000FF00"
-    readonly property color _color: "#400000CC"
+    readonly property color _unusedColor: "#40FF0000"
+    readonly property color _defaultColor:  "#00000000"
     readonly property color _hoveredBorderColor: "yellow"
     readonly property color _borderColor: "grey"
 
@@ -21,13 +23,15 @@ Rectangle {
     width: 100
     height: 100
 
-    color: selected ? _selectedColor : _color
+    color: selected
+           ? _selectedColor
+           : unused
+                ? _unusedColor
+                : _defaultColor
 
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
-
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
 
         onEntered: {
             root.border.color = _hoveredBorderColor;

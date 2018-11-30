@@ -17,6 +17,13 @@ Item {
 
     readonly property string currentImageSource: manager.imagePath
 
+    readonly property int _selectionButton: Qt.LeftButton
+    readonly property int _unselectionButton: Qt.RightButton
+
+    readonly property int _UNSELECT: 0
+    readonly property int _SELECT: 1
+    readonly property int _FORBID: -1
+
     Image {
         id: viewer
 
@@ -99,9 +106,10 @@ Item {
                         SelectionChunk {
                             width: pixelGridSize * viewer.dpX
                             height: pixelGridSize * viewer.dpY
-                            selected: chunkRepeater._model
-                                      ? chunkRepeater._model.data(chunkRepeater._model.index(selectionRow._index, index)) === 1
-                                      : false
+                            selected: chunkRepeater._model.data(chunkRepeater._model.index(selectionRow._index, index))
+                                      === _SELECT
+                            unused: chunkRepeater._model.data(chunkRepeater._model.index(selectionRow._index, index))
+                                    === _FORBID
                         }
                     }
                 }
@@ -111,30 +119,39 @@ Item {
         MouseArea {
             id: editArea
 
-            readonly property int _selectionButton: Qt.LeftButton
-            readonly property int _unselectionButton: Qt.RightButton
-
             function triggerChunk(_x, _y, selection) {
                 var chunkX = Math.floor(_x / (root.pixelGridSize * viewer.dpX))
                 var chunkY = Math.floor(_y / (root.pixelGridSize * viewer.dpY))
                 root.model.setChunk(chunkX, chunkY, selection)
             }
 
+            function chunkState(_pressedButtons)
+            {
+                if ((_pressedButtons & _selectionButton)
+                        && (_pressedButtons & _unselectionButton)){
+                    return _UNSELECT;
+                } else if (_pressedButtons & _selectionButton) {
+                    return _SELECT;
+                } else if (_pressedButtons & _unselectionButton) {
+                    return _FORBID;
+                }
+            }
+
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
             onPressed: {
-                triggerChunk(mouseX, mouseY, (pressedButtons & _selectionButton))
+                triggerChunk(mouseX, mouseY, chunkState(pressedButtons))
             }
 
             onMouseXChanged: {
                 if (pressed) {
-                    triggerChunk(mouseX, mouseY, (pressedButtons & _selectionButton))
+                    triggerChunk(mouseX, mouseY, chunkState(pressedButtons))
                 }
             }
             onMouseYChanged: {
                 if (pressed) {
-                    triggerChunk(mouseX, mouseY, (pressedButtons & _selectionButton))
+                    triggerChunk(mouseX, mouseY, chunkState(pressedButtons))
                 }
             }
         }

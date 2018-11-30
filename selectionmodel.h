@@ -14,7 +14,15 @@ class SelectionModel : public QAbstractItemModel
     Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
     Q_PROPERTY(int height READ height WRITE setHeight NOTIFY heightChanged)
 
+
 public:
+    enum ChunkState {
+        DEFAULT = 0,
+        SELECTED = 1,
+        FORBIDDEN = -1
+    };
+    Q_ENUMS(ChunkState)
+
     explicit SelectionModel(QObject *parent = nullptr);
 
     // Header:
@@ -34,7 +42,7 @@ public:
     void init(int width, int height);
     void init(PointMatrix&& data);
 
-    Q_INVOKABLE void setChunk(int x, int y, bool selected);
+    Q_INVOKABLE void setChunk(int x, int y, ChunkState state);
 
     int width() const;
     int height() const;

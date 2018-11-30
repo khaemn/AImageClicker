@@ -81,23 +81,19 @@ void SelectionModel::init(PointMatrix &&data)
     emit dataChanged(index(0,0), index(rowCount(), columnCount()));
 }
 
-void SelectionModel::setChunk(int x, int y, bool selected)
+void SelectionModel::setChunk(int x, int y, ChunkState state)
 {
-    if ((x >= 0 && x < columnCount())
-        && (y >= 0 && y < rowCount())) {
-
-        auto newValue = selected ? 1 : 0;
-        if (_data.at(y).at(x) == newValue)
-        {
-            return;
-        }
-
-        _data[y][x] = newValue;
-        emit dataChanged(this->index(x,y), this->index(x,y));
-        // Strange temporary solution.
-        beginResetModel();
-        endResetModel();
+    if ((x < 0 || x >= columnCount())
+        || (y < 0 || y >= rowCount())
+        || (_data.at(y).at(x) == state)) {
+        return;
     }
+
+    _data[y][x] = state;
+    emit dataChanged(this->index(x,y), this->index(x,y));
+    // Strange temporary solution.
+    beginResetModel();
+    endResetModel();
 }
 
 int SelectionModel::width() const
