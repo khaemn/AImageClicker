@@ -20,10 +20,6 @@ Item {
     readonly property int _selectionButton: Qt.LeftButton
     readonly property int _unselectionButton: Qt.RightButton
 
-    readonly property int _UNSELECT: 0
-    readonly property int _SELECT: 1
-    readonly property int _FORBID: -1
-
     Image {
         id: viewer
 
@@ -107,9 +103,9 @@ Item {
                             width: pixelGridSize * viewer.dpX
                             height: pixelGridSize * viewer.dpY
                             selected: chunkRepeater._model.data(chunkRepeater._model.index(selectionRow._index, index))
-                                      === _SELECT
+                                      === SelectionModel.SELECTED
                             unused: chunkRepeater._model.data(chunkRepeater._model.index(selectionRow._index, index))
-                                    === _FORBID
+                                    === SelectionModel.FORBIDDEN
                         }
                     }
                 }
@@ -129,11 +125,11 @@ Item {
             {
                 if ((_pressedButtons & _selectionButton)
                         && (_pressedButtons & _unselectionButton)){
-                    return _UNSELECT;
+                    return SelectionModel.DEFAULT;
                 } else if (_pressedButtons & _selectionButton) {
-                    return _SELECT;
+                    return SelectionModel.SELECTED;
                 } else if (_pressedButtons & _unselectionButton) {
-                    return _FORBID;
+                    return SelectionModel.FORBIDDEN;
                 }
             }
 

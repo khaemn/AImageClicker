@@ -13,6 +13,8 @@ Rectangle {
     id: root
 
     property string infoText: "information text"
+    property int currentImageIndex
+    property int totalImages
 
     readonly property var pixelGridSizes: [500, 200, 100, 50, 20, 10]
     readonly property int selectedPixelGridSize: _pixelGridSize
@@ -23,6 +25,7 @@ Rectangle {
     signal backwardClicked
     signal folderSelected(string path)
     signal fileSelected(string path)
+    signal indexEntered(int idx)
 
     height: 50
 
@@ -97,21 +100,43 @@ Rectangle {
         Button {
             id: backwardBtn
             text: "<"
-            width: 50
+            Layout.maximumWidth: 50
             height: root.height
             font.pixelSize: 12
 
-            onClicked: root.backwardClicked()
+            onClicked: {
+                root.backwardClicked();
+                _imageIndex.text = Qt.binding(function(){ return root.currentImageIndex; });
+            }
+        }
+
+        TextInput {
+            id: _imageIndex
+            text: root.currentImageIndex
+            Layout.maximumWidth: contentWidth
+            inputMask: "000"
+            onEditingFinished: {
+                root.indexEntered(text);
+            }
+        }
+
+        Text {
+            id: _totalImages
+            Layout.maximumWidth: 20
+            text: "/ " + root.totalImages
         }
 
         Button {
             id: forwardBtn
             text: ">"
-            width: 50
+            Layout.maximumWidth: 50
             height: root.height
             font.pixelSize: 12
 
-            onClicked: root.forwardClicked()
+            onClicked: {
+                _imageIndex.text = Qt.binding(function(){ return root.currentImageIndex; });
+                root.forwardClicked();
+            }
         }
     }
 

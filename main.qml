@@ -30,6 +30,8 @@ ApplicationWindow {
         anchors.right: parent.right
 
         infoText: clicker.statusText
+        currentImageIndex: fileManager.currentImageNumber
+        totalImages: fileManager.totalImages
 
         onFileSelected: {
             fileManager.openFile(path);
@@ -42,6 +44,9 @@ ApplicationWindow {
         }
         onBackwardClicked: {
             fileManager.loadPrevImage();
+        }
+        onIndexEntered: {
+            fileManager.loadImageByIndex(idx);
         }
     }
 

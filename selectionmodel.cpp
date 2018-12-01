@@ -46,7 +46,7 @@ QVariant SelectionModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
     int value = _data.at(row).at(col);
-    if (value < 0 || value > 1)
+    if (value < -1 || value > 1)
     {
         qDebug() << "Wrong value retrieved:" << value
                  << "row" << row
@@ -105,6 +105,10 @@ int SelectionModel::height() const
 {
     return m_height;
 }
+
+
+
+
 
 void SelectionModel::setWidth(int width)
 {

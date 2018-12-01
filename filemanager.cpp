@@ -8,6 +8,7 @@
 static const QString MODEL_EXTENSION = ".txt";
 static const QStringList EXTENSION_FILTERS = { "*.png", "*.jpg", "*.jpeg" };
 
+
 FileManager::FileManager(QObject *parent) : QObject(parent)
 {
 }
@@ -41,6 +42,8 @@ void FileManager::openFile(const QString &file)
         _model->init(gridWidth, gridHeight);
     }
 
+    setTotalImages(m_availableImages.size());
+    setCurrentImageNumber(m_currentImageFileNumber);
     setImagePath(file);
 }
 
@@ -51,7 +54,8 @@ void FileManager::openDir(const QString &dir)
     QDir imageFolder(dirPath);
 
     m_availableImages.clear();
-    m_currentImageFileIndex = -1;
+    setTotalImages(0);
+
     auto availableFiles = imageFolder.entryList(EXTENSION_FILTERS);
 
     if (availableFiles.empty())
@@ -65,8 +69,8 @@ void FileManager::openDir(const QString &dir)
         m_availableImages.append(QUrl::fromLocalFile(imageFolder.path() + "/" + file).toString());
     }
 
-    m_currentImageFileIndex = 0;
-    openFile(m_availableImages.at(m_currentImageFileIndex));
+    m_currentImageFileNumber = 0;
+    openFile(m_availableImages.at(m_currentImageFileNumber));
 }
 
 void FileManager::loadNextImage()
@@ -76,11 +80,8 @@ void FileManager::loadNextImage()
     {
         return;
     }
-    if (++m_currentImageFileIndex >= m_availableImages.size())
-    {
-        m_currentImageFileIndex = m_availableImages.size() - 1;
-    }
-    openFile(m_availableImages.at(m_currentImageFileIndex));
+    setCurrentImageNumber(std::min((m_availableImages.size() - 1), (m_currentImageFileNumber + 1)));
+    openFile(m_availableImages.at(m_currentImageFileNumber));
 }
 
 void FileManager::loadPrevImage()
@@ -90,15 +91,28 @@ void FileManager::loadPrevImage()
     {
         return;
     }
-    if (--m_currentImageFileIndex < 0)
+    setCurrentImageNumber(std::max(0, (m_currentImageFileNumber - 1)));
+    openFile(m_availableImages.at(m_currentImageFileNumber));
+}
+
+void FileManager::loadImageByIndex(int index)
+{
+    saveSelectionFile();
+    if (m_availableImages.isEmpty())
     {
-        m_currentImageFileIndex = 0;
+        return;
     }
-    openFile(m_availableImages.at(m_currentImageFileIndex));
+    setCurrentImageNumber(std::min((m_availableImages.size() - 1), std::max(0, (index - 1))));
+    openFile(m_availableImages.at(m_currentImageFileNumber));
 }
 
 void FileManager::saveSelectionFile()
 {
+    if (m_imagePath.isEmpty())
+    {
+        // Nothing to dave if the filename is empty.
+        return;
+    }
     QUrl url(m_imagePath);
     QFileInfo pathToImage(url.toLocalFile());
 
@@ -119,6 +133,20 @@ QString FileManager::imagePath() const
 int FileManager::pixelGridSize() const
 {
     return m_pixelGridSize;
+}
+
+int FileManager::totalImages() const
+{
+    return m_totalImages;
+}
+
+int FileManager::currentImageNumber() const
+{
+    if (m_availableImages.empty())
+    {
+        return 0;
+    }
+    return m_currentImageFileNumber + 1; // To display 0 as 1 on UI
 }
 
 void FileManager::setImagePath(QString imagePath)
@@ -263,4 +291,19 @@ bool FileManager::loadFileToModel(const QString &filename)
     _model->init(std::move(matrix));
 
     return true;
+}
+
+void FileManager::setTotalImages(int totalImages)
+{
+    if (m_totalImages == totalImages)
+        return;
+
+    m_totalImages = totalImages;
+    emit totalImagesChanged(m_totalImages);
+}
+
+void FileManager::setCurrentImageNumber(int currentImageIndex)
+{
+    m_currentImageFileNumber = currentImageIndex;
+    emit currentImageIndexChanged(m_currentImageFileNumber);
 }

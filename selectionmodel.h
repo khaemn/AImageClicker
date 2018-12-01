@@ -14,12 +14,14 @@ class SelectionModel : public QAbstractItemModel
     Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
     Q_PROPERTY(int height READ height WRITE setHeight NOTIFY heightChanged)
 
+    void setWidth(int width);
+    void setHeight(int height);
 
 public:
     enum ChunkState {
+        FORBIDDEN = -1,
         DEFAULT = 0,
-        SELECTED = 1,
-        FORBIDDEN = -1
+        SELECTED = 1
     };
     Q_ENUMS(ChunkState)
 
@@ -46,10 +48,6 @@ public:
 
     int width() const;
     int height() const;
-
-public slots:
-    void setWidth(int width);
-    void setHeight(int height);
 
 signals:
     void widthChanged(int width);
